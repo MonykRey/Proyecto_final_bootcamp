@@ -30,7 +30,7 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 - ***Enlace al reporte renderizado***: https://monykrey.github.io/Proyecto_final_bootcamp/
 
-- ***Enlace a la presentacion del equipo***: https://monykrey.github.io/Proyecto_final_bootcamp/Final_Report_presentacion.html
+- ***Enlace a la presentacion del equipo***: https://monykrey.github.io/Proyecto_final_bootcamp/Final_Report_presentacion.html#/title-slide
 
 ---
 
