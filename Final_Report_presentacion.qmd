@@ -1,0 +1,294 @@
+---
+title: "Mating Crosses of Chickens"
+subtitle: "Análisis de cruces reproductivos en aves White Rock"
+author: "Mónica Reyes, Natalie Pineda"
+date: "30 Junio 2026"
+format:
+  revealjs:
+    theme: simple
+    highlight-style: tango
+    slide-number: true
+    toc: false
+    incremental: false
+    code-fold: true
+    transition: slide
+---
+
+## 1. Descarga de datos
+
+Instalamos el paquete `agridat`, que contiene el dataset `becker.chicken`.
+
+Los datos se exportan a **CSV** y **Excel**, y ambos archivos se encuentran disponibles en el repositorio de GitHub.
+
+```{r}
+#| echo: true
+rm(list = ls())
+library(agridat)
+library(ggplot2)
+library(dplyr)
+library(nlme)
+library(lattice)
+data(becker.chicken)
+
+# Como CSV
+write.csv(becker.chicken, "becker_chicken.csv", row.names = FALSE)
+
+# Como Excel
+library(writexl)
+write_xlsx(becker.chicken, "becker_chicken.xlsx")
+```
+
+## 2. Descripción de los datos
+
+- Grupo de aves **White Rock**: 5 machos apareados con 3 hembras cada uno
+- Se registra el **peso corporal de las crías** a las 8 semanas de edad
+- **45 filas** (combinaciones macho x hembra) y **3 columnas**
+- `Male`: factor con 5 niveles
+- `Female`: factor con 15 niveles
+- `Weight`: variable numérica (peso en gramos)
+
+```{r}
+#| echo: true
+D <- becker.chicken
+dim(D)
+str(D)
+```
+
+## 3. Limpieza de datos
+
+Se revisó calidad de datos: valores faltantes, outliers y correcta clasificación de factores.
+
+- **Sin valores faltantes ni duplicados**
+- **Sin outliers relevantes**
+- Tipos de dato correctos (`Weight` numérico, `Male`/`Female` factores)
+
+```{r}
+#| echo: true
+#| results: hide
+sum(is.na(D))
+sum(duplicated(D))
+range(D$weight)
+```
+
+## Gráfica: Distribución de peso corporal
+
+```{r}
+#| echo: true
+#| fig-align: center
+boxplot(D$weight, col = "lightblue",
+        main = "Distribución de peso corporal de crías",
+        ylab = "Peso corporal de crías (g)")
+```
+
+# 4. Preguntas de análisis
+
+## a. Variación dentro de una misma cruza
+
+- Desviación estándar promedio dentro de cruza: **~74 g**
+- Cruzas más consistentes: **M5 x F13** (SD ~26.9 g), **M5 x F14** (SD ~28.3 g)
+- Cruzas más dispersas: **M1 x F01** (SD ~104 g), **M2 x F05** (SD ~107 g)
+- La variación no es homogénea entre familias: posibles causas → variabilidad individual, incubación, orden de eclosión
+
+```{r}
+#| echo: true
+#| results: hide
+D$cmating <- paste(D$male, "x", D$female)
+resumen_cruce <- D %>%
+  group_by(cmating) %>%
+  summarise(n = n(), media = mean(weight), sd = sd(weight),
+            var = var(weight), rango = max(weight) - min(weight))
+```
+
+## Gráfica: Peso de la progenie por cruza
+
+```{r}
+#| echo: true
+#| fig-align: center
+dotplot(weight ~ female, data = D, group = male,
+        main = "Peso de la progenie M x F",
+        xlab = "Hembra", ylab = "Peso (g)",
+        auto.key = list(columns = 5))
+```
+
+## b. ¿Genética o ambiente?
+
+Se ajustó un modelo mixto (`nlme::lme`) con macho y hembra anidada como efectos aleatorios.
+
+- **32%** de la variación → varianza genética aditiva (medios hermanos paternos)
+- **68%** de la variación → varianza ambiental (efecto materno + residual)
+- Contribución genética relevante, pero la mayoría de la variación es no genética
+
+```{r}
+#| echo: true
+#| results: hide
+model <- lme(weight ~ 1, random = ~ 1 | male/female, data = D)
+vc <- VarCorr(model)
+var_macho    <- as.numeric(vc[2, 1])
+var_hembra   <- as.numeric(vc[4, 1])
+var_residual <- as.numeric(vc[5, 1])
+var_genetica  <- 4 * var_macho
+var_ambiental <- var_residual + var_hembra
+
+var_df <- data.frame(
+  fuente = c("Genética", "Ambiental"),
+  varianza = c(var_genetica, var_ambiental)
+) %>%
+  mutate(total = sum(varianza), porcentaje = round(varianza / total * 100, 1))
+```
+
+## Gráfica: Partición de varianza
+
+```{r}
+#| echo: true
+#| fig-align: center
+ggplot(var_df, aes(x = "", y = porcentaje, fill = fuente)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label = paste0(porcentaje, "%")),
+            position = position_stack(vjust = 0.5),
+            size = 4, color = "white", fontface = "bold") +
+  scale_fill_manual(values = c("#2a78d6", "#b4b2a9")) +
+  coord_flip() +
+  labs(title = "Partición de varianza: genética vs ambiental",
+       x = "", y = "Porcentaje (%)", fill = "Fuente") +
+  theme_minimal()
+```
+
+## c. Mejores reproductores (machos y hembras)
+
+- **M5**: mejor reproductor, efecto **+21.2 g** sobre la media | **M1**: menor efectividad, **-23.3 g**
+- Mejores hembras individuales: **F14** (+33.58 g), **F01** (+23.32 g)
+- Menor desempeño: **F03** (-31.52 g), **F02** (-24.68 g)
+- En hembras, el diseño no aísla completamente su efecto genético del macho
+
+```{r}
+#| echo: true
+#| results: hide
+ranef_macho <- ranef(model)$male
+ranef_macho <- data.frame(male = rownames(ranef_macho),
+                           efecto = ranef_macho[, 1]) %>%
+  arrange(desc(efecto)) %>%
+  mutate(signo = ifelse(efecto > 0, "Por encima", "Por debajo"))
+```
+
+## Gráfica: Capacidad reproductiva de los machos
+
+```{r}
+#| echo: true
+#| fig-align: center
+ggplot(ranef_macho, aes(x = reorder(male, efecto), y = efecto, fill = signo)) +
+  geom_col() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  geom_text(aes(label = round(efecto, 1),
+                vjust = ifelse(efecto > 0, -0.5, 1.3)), size = 3.5) +
+  scale_fill_manual(values = c("Por encima" = "#1D9E75", "Por debajo" = "#D85A30")) +
+  coord_flip() +
+  labs(title = "Capacidad reproductiva de los machos",
+       subtitle = "Efecto sobre el peso de la progenie (BLUP)",
+       x = "Macho", y = "Efecto (g)", fill = "") +
+  theme_minimal()
+```
+
+## d. Predicción de cruzas nuevas
+
+**Predicción = Intercepto (808.47 g) + Efecto genético del macho (BLUP)**
+
+- Nueva cruza con **M5** (mejor reproductor) → **829.64 g** esperados
+- Nueva cruza con **M1** (menor mérito) → **785.16 g** esperados
+- Limitación: el efecto de la hembra está anidado dentro de su macho original, por lo que **no es transferible** a otras cruzas
+
+```{r}
+#| echo: true
+#| results: hide
+machos  <- unique(D$male)
+hembras <- unique(D$female)
+intercepto <- as.numeric(fixef(model)[1])
+
+predicciones_nuevas <- expand.grid(male = machos, female_nueva = hembras) %>%
+  left_join(ranef_macho %>% select(male, efecto_macho = efecto), by = "male") %>%
+  mutate(peso_predicho = intercepto + efecto_macho) %>%
+  anti_join(D %>% select(male, female_nueva = female), by = c("male", "female_nueva")) %>%
+  arrange(desc(peso_predicho))
+
+pred_resumen <- predicciones_nuevas %>%
+  distinct(male, peso_predicho) %>%
+  arrange(desc(peso_predicho))
+```
+
+## Gráfica: Peso predicho por macho
+
+```{r}
+#| echo: true
+#| fig-align: center
+ggplot(pred_resumen, aes(x = reorder(male, peso_predicho), y = peso_predicho, fill = male)) +
+  geom_col(width = 0.6) +
+  geom_hline(yintercept = intercepto, linetype = "dashed", color = "gray40") +
+  geom_text(aes(label = round(peso_predicho, 1)), vjust = -0.5, size = 4) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Peso esperado de progenie en cruzas nuevas, según el macho",
+       subtitle = "Predicción = intercepto + efecto genético del macho (BLUP)",
+       x = "Macho", y = "Peso predicho de la progenie (g)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## e. Consistencia del efecto del macho
+
+¿El efecto de un macho es estable sin importar la hembra, o depende de la combinación específica?
+
+- **M3**: muy consistente (SD = 8.9 g) → efecto genético estable
+- **M1**: muy inconsistente (SD = 80.1 g), varía de 700 g a 848 g según la hembra
+- **M4** y **M5**: variación moderada (SD = 53.3 g y 70.7 g)
+
+```{r}
+#| echo: true
+#| results: hide
+medias_cruza <- D %>%
+  group_by(male, female) %>%
+  summarise(media_cruza = mean(weight), .groups = "drop")
+
+consistencia_macho <- medias_cruza %>%
+  group_by(male) %>%
+  summarise(
+    media_general = mean(media_cruza),
+    sd_entre_hembras = sd(media_cruza),
+    rango = max(media_cruza) - min(media_cruza),
+    cv_pct = round(sd_entre_hembras / media_general * 100, 1)
+  ) %>%
+  arrange(sd_entre_hembras)
+```
+
+## Gráfica: Consistencia entre machos
+
+```{r}
+#| echo: true
+#| fig-align: center
+ggplot(consistencia_macho, aes(x = reorder(male, sd_entre_hembras), y = sd_entre_hembras, fill = male)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = paste0(round(sd_entre_hembras, 1), " g")), vjust = -0.5, size = 3.5) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "¿Qué tan consistente es cada macho entre sus hembras?",
+       subtitle = "Barra chica = efecto estable | barra grande = depende de la hembra",
+       x = "Macho", y = "SD entre medias de hembras (g)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+# 5. Conclusiones
+
+## Hallazgos principales
+
+- El peso de la progenie varía en promedio **~74 g** dentro de una misma cruza, con notable heterogeneidad entre familias (SD entre ~27 g y ~107 g)
+- **68%** de la variación es de origen ambiental; solo **32%** es varianza genética
+- **M5** es el mejor reproductor (+21.2 g); **M1** el de menor mérito (-23.3 g)
+- Entre hembras, **F14** y **F01** destacan; **F03** y **F02** tienen el menor aporte
+
+## Implicaciones prácticas
+
+- El modelo predice con confianza el peso esperado de una **cruza nueva** a partir del efecto del macho
+- No es posible anticipar el efecto de una hembra fuera de su cruza original (diseño anidado hembra dentro de macho)
+- El efecto del macho **no siempre es consistente**: M3 es estable (SD = 8.9 g), M1 depende fuertemente de la hembra (SD = 80.1 g)
+- **Selección de reproductores**: el efecto promedio (BLUP) por sí solo puede ser insuficiente — machos con buen mérito pero baja consistencia (M1) implican mayor riesgo que machos con mérito moderado y alta consistencia (M3)
+
+## ¡Gracias!
+
+Preguntas y comentarios son bienvenidos.
