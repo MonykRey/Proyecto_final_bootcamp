@@ -78,6 +78,10 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 - `Proyecto_final_bootcamp.Rproj`: código interno del Rproject
 
+- `Final_Report_presentacion.qmd`: presentación en qmd
+
+- `Final_Report_presentacion.html`: reporte renderizado de la presentación
+
 
 ## 📦 Requisitos y Dependencias
 
