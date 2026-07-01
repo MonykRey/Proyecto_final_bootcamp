@@ -74,6 +74,8 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 - `index.html`: reporte renderizado en formato html
 
+- `Proyecto_final_bootcamp.Rproj`: código interno del Rproject
+
 
 ## 📦 Requisitos y Dependencias
 
