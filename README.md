@@ -78,7 +78,8 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 - `Proyecto_final_bootcamp.Rproj`: código interno del Rproject
 
-- `Final_Report_presentacion.html`: reporte renderizado de la presentación
+- `Final_Report_presentacion_files`: carpeta donde se guardan todas las dependencias para que el archivo Final_Report_presentacion.html pueda cargar como presentación
+  
 
 
 ## 📦 Requisitos y Dependencias
