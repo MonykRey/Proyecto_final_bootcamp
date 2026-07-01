@@ -93,13 +93,13 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 ### Librerías
 
-| Herramienta | Versión | Uso |
-|:-------------:|:---------:|:-----:|
-| agridat | - | Dataset |
-| lattice | - | Gráficos multivariados |
-| dplyr | - | Manipulación y transformación de datos |
-| nlme | - |  Ajustar y comparar modelos de efectos mixtos |
-| ggplot2 | - | Visualización de datos |
+| Herramienta | Uso |
+|:-------------:|:-----:|
+| agridat | Dataset |
+| lattice | Gráficos multivariados |
+| dplyr | Manipulación y transformación de datos |
+| nlme | Ajustar y comparar modelos de efectos mixtos |
+| ggplot2 | Visualización de datos |
 
 ## 📚 Referencias
 
