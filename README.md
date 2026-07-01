@@ -70,7 +70,7 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 - `README.md` 
 
-- `Final_Report`: reporte final en formato Rmd
+- `Datos/Raw` : matrices de datos utilizadas para el análisis (datos crudos), en formato csv y xlsx
 
 - `index.html`: reporte renderizado en formato html
 
