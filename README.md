@@ -29,6 +29,7 @@ Este proyecto buscar aplicar los conocimientos adquiridos durante el curso media
 A través de cinco preguntas clave, se exploran las herramientas estadísticas y de manipulación de datos que ofrece el Software, con el objetivo de extraer conclusiones significativas a partir de los datos de cruzamiento entre individuos de distintas líneas genéticas de pollos.
 
 ***Enlace al reporte renderizado***: https://monykrey.github.io/Proyecto_final_bootcamp/
+
 ***Enlace a la presentacion del equipo***: 
 
 ---
