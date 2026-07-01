@@ -60,17 +60,13 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 	
 	d) ¿Se puede predecir el peso de nuevas cruzas a partir de los datos existentes?
 	
-	e) 
+	e) ¿El efecto de un macho es el mismo (consistente) sin importar con qué hembra se cruce, o depende de la combinación específica (macho x hembra)?
 
 ### 📁 Estructura del Repositorio en GitHub
 
-- `out`: archivo de salidas de la terminal de R
-
 - `scripts`: archivo de R con el código para el análisis
 
-- `quality`: reporte de análisis de control de calidad (realizado con FastQC y MultiQC) sobre los 16 archivos de las secuencias crudas, y después del filtrado utilizando Trimmomatic. 
-
-- `results`: matrices y gráficas generadas con R
+- `figures`: imagenes/gráficas generadas durante el análisis
 
 - `README.md` 
 
