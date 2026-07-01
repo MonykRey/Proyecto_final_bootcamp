@@ -83,7 +83,7 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 | Herramienta | Versión | Uso |
 |:-------------:|:---------:|:-----:|
-| R | - | Análisis estadístico |
+| R | 2026.01.1+403 | Análisis estadístico |
 
 ### Librerías
 
