@@ -66,7 +66,7 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 
 ### 📁 Estructura del Repositorio en GitHub
 
-- `scripts`: archivo de R con el código para el análisis
+- `scripts`: archivos de R con los códigos para el análisis y la presentaión en qmd
 
 - `figures`: imagenes/gráficas generadas durante el análisis
 
@@ -77,8 +77,6 @@ A través de cinco preguntas clave, se exploran las herramientas estadísticas y
 - `index.html`: reporte renderizado en formato html
 
 - `Proyecto_final_bootcamp.Rproj`: código interno del Rproject
-
-- `Final_Report_presentacion.qmd`: presentación en qmd
 
 - `Final_Report_presentacion.html`: reporte renderizado de la presentación
 
