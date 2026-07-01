@@ -48,7 +48,7 @@ Para realizar el análisis vamos a guardar los datos en un vector, `D`.
 Utilizando el comando de dimensiones vemos que este Dataset contiene 45 filas (correspondientes a las diferentes combinaciones de aparemiento entre aves) y 3 columnas (correspondientes al identificador de machos, hembras y el peso corporal de las crías).
 
 Tenemos que explorar que tipos de datos almacena, para ello utilizamos el comando `str` y vemos que el peso corporal es una variable numérica mientras que el sexo es una variable de tipo factor de 5 niveles para machos y 15 niveles para hembras. 
-```{r}
+```{r, echo=FALSE}
 D <- becker.chicken
 # Visualizar datos
 #View(D)
@@ -69,7 +69,9 @@ Debido a que los datos no presentan valores faltantes o outliers podemos continu
 - `Male`: variable de tipo factor con 5 niveles. 
 
 - `Female`: variable de tipo factor con 15 niveles, ya que cada macho se reprodujo con tres hembras
-```{r}
+
+<br>
+```{r, echo=FALSE}
 # Valores faltantes
 sum(is.na(D))
 sum(duplicated(D))
@@ -91,7 +93,8 @@ levels(D$female)
 En promedio, el peso de las crías dentro de una misma cruza varía con una desviación estándar de aproximadamente 74 g alrededor de la media de su grupo. Mirando la tabla, esa variación no es homogénea entre cruzas: hay cruzas bastante consistentes, como M5 x F13 (sd ~ 26.9 g, rango de solo 53 g) o M5 x F14 (sd ~28.3 g), y otras con mucha más dispersión interna, como M1 x F01 (sd ~ 104 g, rango de 200 g) o M2 x F05 (sd ~ 107 g). 
 
 Esto sugiere que, aunque en promedio la variación dentro de cruza es cercana a 74 g, hay diferencias entre familias en el peso de las crías, lo cual puede deberse a variabilidad individual, condiciones de incubación, orden de eclosión, etc., y no necesariamente es algo atribuible al macho o la hembra en sí. 
-```{r}
+<br>
+```{r, echo=FALSE, results='hide'}
 # Crear variable de cruce
 D$cmating <- paste(D$male, "x", D$female)
 
@@ -120,7 +123,8 @@ Para responder las siguientes preguntas utilizamos el código disponible en la p
 ### b. ¿Qué porcentaje de la variación total es ambiental vs genética?
 
 Del total de la variación observada en el peso corporal a las 8 semanas, aproximadamente el 32% se atribuye a varianza genética aditiva (estimada a partir de la varianza entre machos, multiplicada por 4 según el diseño de medios hermanos paternos), mientras que el 68% corresponde a varianza ambiental, que en este caso incluye tanto efectos maternos (varianza entre hembras dentro de cada macho) como variación no explicada (ambiente individual, manejo, etc). Esto indica que, existe una contribución genética relevante, pero la mayor parte de la variación en el peso de las crías se debe a factores no genéticos.
-```{r, echo = FALSE}
+<br>
+```{r, echo=FALSE, results='hide'}
 # Modelo para 
 model <- lme(weight ~ 1, 
               random = ~ 1|male/female, 
@@ -169,7 +173,10 @@ En este caso, el sujeto experimental M5 es el mejor reproductor por el efecto po
 En cuanto a las hembras, dado que el diseño experimental no permite aislar completamente su contribución genética individual del macho con el que fueron apareadas, reportamos el efecto individual de hembra (efecto, columna de ranef_hembra antes de sumar el efecto de macho) para medir su capacidad reproductiva propia. 
 
 Bajo ese criterio, las mejores hembras individuales son F14 (+33.58 g) y F01 (+23.32 g), mientras que las de menor desempeño son F03 (-31.52 g) y F02 (-24.68 g) y finalmente F03, F02, F13, que están distribuidas entre distintos machos, lo que sugiere que su bajo desempeño no es solo por un efecto paterno. 
-```{r}
+
+<br>
+
+```{r, echo=FALSE, results='hide'}
 # --- Efectos aleatorios de los MACHOS (BLUPs) ---
 # ranef() extrae los efectos aleatorios estimados por el modelo mixto.
 # Para cada macho, este valor representa cuánto se desvía el peso esperado de su progenie respecto a la media general (intercepto), atribuible a su efecto genético paterno
@@ -248,7 +255,9 @@ Por ejemplo, una cruza nueva con M5, el mejor reproductor del lote, tendría un 
 Sin embargo, una limitación del modelo es que debido al diseño experimental el efecto de la hembra está anidado dentro del macho con el que fue cruzada originalmente, entonces su efecto no se puede transferir para otras cruzas con un macho distinto. Por ello, la predicción de una cruza nueva (macho conocido + hembra ya evaluada, pero en una combinación distinta a la original) depende únicamente del efecto del macho, y no aprovecha la información previa sobre la hembra. 
 
 Esto sugiere que el modelo permite predecir el efecto esperado de un macho en una nueva cruza, pero no permite anticipar de forma específica cómo se comportaría una hembra particular fuera del contexto de su cruza original.
-```{r}
+
+<br>
+```{r, echo=FALSE, results='hide'}
 # Lista de los 5 machos y las 15 hembras presentes en el dataset original
 machos  <- unique(D$male)
 hembras <- unique(D$female)
@@ -287,7 +296,9 @@ predicciones_nuevas <-
 predicciones_nuevas
 ```
 
-```{r, echo = FALSE}
+<br>
+
+```{r, echo=FALSE, results='hide'}
 # Gráficas
 pred_resumen <- predicciones_nuevas %>%
   distinct(male, peso_predicho) %>%
@@ -311,6 +322,8 @@ ggplot(pred_resumen, aes(x = reorder(male, peso_predicho), y = peso_predicho, fi
   theme_minimal() +
   theme(legend.position = "none")
 
+
+  
 # Gráfica 2
 ggplot(D, aes(x = reorder(male, weight, FUN = mean), y = weight)) +
   geom_boxplot(aes(fill = male), alpha = 0.3, outlier.shape = NA) +
@@ -340,7 +353,8 @@ M4 y M5 tambien muesyta variación considerable entre sus hembras (SD = 53.3g y 
 
 Esto sugiere que, aunque algunos machos, trasmiten un efecto genético bastante estable sin importar la hembra con la que se cruzen, mientras que otros, el resultado depende fuertemente de la combinación especifica, posiblemente esto se deba por el efecto de cada hembra o la variación individual entre las crías que el modelp no logra capturar del todo.
 
-```{r}
+<br>
+```{r, echo=FALSE, results='hide'}
 # Consistencia = si el macho da crías con pesos parecidos, sin importar con cuál hembra se cruzó.
 # Media de peso por cada cruza macho x hembra
 # (cada hembra solo aparece con un macho, en este caso tres hembras se cruzan solamente con un macho especifico)
@@ -368,10 +382,10 @@ consistencia_macho <- medias_cruza %>%
 consistencia_macho
 
 ```
+<br>
 
 
-
-```{r}
+```{r, echo=FALSE}
 # Graficas:
 
 # Gráfica 1: peso de cada cría, agrupado por hembra y separado por macho 
@@ -389,6 +403,7 @@ ggplot(D, aes(x = female, y = weight, color = male)) +
   theme_minimal() +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 # Gráfica 2: comparar la consistencia (sd) entre los 5 machos
 # Barra chica = macho consistente (poca dispersión entre sus hembras)
