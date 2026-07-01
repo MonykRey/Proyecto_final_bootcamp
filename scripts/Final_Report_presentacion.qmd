@@ -40,12 +40,12 @@ write_xlsx(becker.chicken, "becker_chicken.xlsx")
 
 ## 2. Descripción de los datos
 
-- Grupo de aves **White Rock**: 5 machos apareados con 3 hembras cada uno
-- Se registra el **peso corporal de las crías** a las 8 semanas de edad
-- **45 filas** (combinaciones macho x hembra) y **3 columnas**
-- `Male`: factor con 5 niveles
-- `Female`: factor con 15 niveles
-- `Weight`: variable numérica (peso en gramos)
+-   Grupo de aves **White Rock**: 5 machos apareados con 3 hembras cada uno
+-   Se registra el **peso corporal de las crías** a las 8 semanas de edad
+-   **45 filas** (combinaciones macho x hembra) y **3 columnas**
+-   `Male`: factor con 5 niveles
+-   `Female`: factor con 15 niveles
+-   `Weight`: variable numérica (peso en gramos)
 
 ```{r}
 #| echo: true
@@ -58,9 +58,9 @@ str(D)
 
 Se revisó calidad de datos: valores faltantes, outliers y correcta clasificación de factores.
 
-- **Sin valores faltantes ni duplicados**
-- **Sin outliers relevantes**
-- Tipos de dato correctos (`Weight` numérico, `Male`/`Female` factores)
+-   **Sin valores faltantes ni duplicados**
+-   **Sin outliers relevantes**
+-   Tipos de dato correctos (`Weight` numérico, `Male`/`Female` factores)
 
 ```{r}
 #| echo: true
@@ -84,10 +84,10 @@ boxplot(D$weight, col = "lightblue",
 
 ## a. Variación dentro de una misma cruza
 
-- Desviación estándar promedio dentro de cruza: **~74 g**
-- Cruzas más consistentes: **M5 x F13** (SD ~26.9 g), **M5 x F14** (SD ~28.3 g)
-- Cruzas más dispersas: **M1 x F01** (SD ~104 g), **M2 x F05** (SD ~107 g)
-- La variación no es homogénea entre familias: posibles causas → variabilidad individual, incubación, orden de eclosión
+-   Desviación estándar promedio dentro de cruza: **\~74 g**
+-   Cruzas más consistentes: **M5 x F13** (SD \~26.9 g), **M5 x F14** (SD \~28.3 g)
+-   Cruzas más dispersas: **M1 x F01** (SD \~104 g), **M2 x F05** (SD \~107 g)
+-   La variación no es homogénea entre familias: posibles causas → variabilidad individual, incubación, orden de eclosión
 
 ```{r}
 #| echo: true
@@ -114,9 +114,9 @@ dotplot(weight ~ female, data = D, group = male,
 
 Se ajustó un modelo mixto (`nlme::lme`) con macho y hembra anidada como efectos aleatorios.
 
-- **32%** de la variación → varianza genética aditiva (medios hermanos paternos)
-- **68%** de la variación → varianza ambiental (efecto materno + residual)
-- Contribución genética relevante, pero la mayoría de la variación es no genética
+-   **32%** de la variación → varianza genética aditiva (medios hermanos paternos)
+-   **68%** de la variación → varianza ambiental (efecto materno + residual)
+-   Contribución genética relevante, pero la mayoría de la variación es no genética
 
 ```{r}
 #| echo: true
@@ -155,10 +155,10 @@ ggplot(var_df, aes(x = "", y = porcentaje, fill = fuente)) +
 
 ## c. Mejores reproductores (machos y hembras)
 
-- **M5**: mejor reproductor, efecto **+21.2 g** sobre la media | **M1**: menor efectividad, **-23.3 g**
-- Mejores hembras individuales: **F14** (+33.58 g), **F01** (+23.32 g)
-- Menor desempeño: **F03** (-31.52 g), **F02** (-24.68 g)
-- En hembras, el diseño no aísla completamente su efecto genético del macho
+-   **M5**: mejor reproductor, efecto **+21.2 g** sobre la media \| **M1**: menor efectividad, **-23.3 g**
+-   Mejores hembras individuales: **F14** (+33.58 g), **F01** (+23.32 g)
+-   Menor desempeño: **F03** (-31.52 g), **F02** (-24.68 g)
+-   En hembras, el diseño no aísla completamente su efecto genético del macho
 
 ```{r}
 #| echo: true
@@ -192,9 +192,9 @@ ggplot(ranef_macho, aes(x = reorder(male, efecto), y = efecto, fill = signo)) +
 
 **Predicción = Intercepto (808.47 g) + Efecto genético del macho (BLUP)**
 
-- Nueva cruza con **M5** (mejor reproductor) → **829.64 g** esperados
-- Nueva cruza con **M1** (menor mérito) → **785.16 g** esperados
-- Limitación: el efecto de la hembra está anidado dentro de su macho original, por lo que **no es transferible** a otras cruzas
+-   Nueva cruza con **M5** (mejor reproductor) → **829.64 g** esperados
+-   Nueva cruza con **M1** (menor mérito) → **785.16 g** esperados
+-   Limitación: el efecto de la hembra está anidado dentro de su macho original, por lo que **no es transferible** a otras cruzas
 
 ```{r}
 #| echo: true
@@ -235,9 +235,9 @@ ggplot(pred_resumen, aes(x = reorder(male, peso_predicho), y = peso_predicho, fi
 
 ¿El efecto de un macho es estable sin importar la hembra, o depende de la combinación específica?
 
-- **M3**: muy consistente (SD = 8.9 g) → efecto genético estable
-- **M1**: muy inconsistente (SD = 80.1 g), varía de 700 g a 848 g según la hembra
-- **M4** y **M5**: variación moderada (SD = 53.3 g y 70.7 g)
+-   **M3**: muy consistente (SD = 8.9 g) → efecto genético estable
+-   **M1**: muy inconsistente (SD = 80.1 g), varía de 700 g a 848 g según la hembra
+-   **M4** y **M5**: variación moderada (SD = 53.3 g y 70.7 g)
 
 ```{r}
 #| echo: true
@@ -277,17 +277,17 @@ ggplot(consistencia_macho, aes(x = reorder(male, sd_entre_hembras), y = sd_entre
 
 ## Hallazgos principales
 
-- El peso de la progenie varía en promedio **~74 g** dentro de una misma cruza, con notable heterogeneidad entre familias (SD entre ~27 g y ~107 g)
-- **68%** de la variación es de origen ambiental; solo **32%** es varianza genética
-- **M5** es el mejor reproductor (+21.2 g); **M1** el de menor mérito (-23.3 g)
-- Entre hembras, **F14** y **F01** destacan; **F03** y **F02** tienen el menor aporte
+-   El peso de la progenie varía en promedio **\~74 g** dentro de una misma cruza, con notable heterogeneidad entre familias (SD entre \~27 g y \~107 g)
+-   **68%** de la variación es de origen ambiental; solo **32%** es varianza genética
+-   **M5** es el mejor reproductor (+21.2 g); **M1** el de menor mérito (-23.3 g)
+-   Entre hembras, **F14** y **F01** destacan; **F03** y **F02** tienen el menor aporte
 
 ## Implicaciones prácticas
 
-- El modelo predice con confianza el peso esperado de una **cruza nueva** a partir del efecto del macho
-- No es posible anticipar el efecto de una hembra fuera de su cruza original (diseño anidado hembra dentro de macho)
-- El efecto del macho **no siempre es consistente**: M3 es estable (SD = 8.9 g), M1 depende fuertemente de la hembra (SD = 80.1 g)
-- **Selección de reproductores**: el efecto promedio (BLUP) por sí solo puede ser insuficiente — machos con buen mérito pero baja consistencia (M1) implican mayor riesgo que machos con mérito moderado y alta consistencia (M3)
+-   El modelo predice con confianza el peso esperado de una **cruza nueva** a partir del efecto del macho
+-   No es posible anticipar el efecto de una hembra fuera de su cruza original (diseño anidado hembra dentro de macho)
+-   El efecto del macho **no siempre es consistente**: M3 es estable (SD = 8.9 g), M1 depende fuertemente de la hembra (SD = 80.1 g)
+-   **Selección de reproductores**: el efecto promedio (BLUP) por sí solo puede ser insuficiente — machos con buen mérito pero baja consistencia (M1) implican mayor riesgo que machos con mérito moderado y alta consistencia (M3)
 
 ## ¡Gracias!
 
