@@ -326,3 +326,100 @@ ggplot(D, aes(x = reorder(male, weight, FUN = mean), y = weight)) +
   theme(legend.position = "none")
 ```
 
+
+
+
+
+### e. ¿El efecto de un macho es el mismo (consistente) sin importar con qué hembra se cruce, o depende de la combinación específica (macho x hembra)?
+
+Depende del macho. Debido a que en este diseño cada hembra solo se apareó con un único macho (tres hembras se apareaban con un macho), no es posible probar la interación macho con un ANOVA, en cambio, aquí evaluamos la consistencia (si el macho da crías con pesos parecidos, sin importar con cuál hembra se cruzó) del efecto del macho observado que tan parecidas son las medias de los pesos de las crias que se tienen de las tres hembras entre sí.
+
+M3 es el macho en el cual se puede ver que las crías que se producieron tienen pesos muy similares, (SD = 8.9 g), mientras que M1 es el que tiene crias con pesos con mucha variación varia de 700 g a 848g, dependiendo de con cuál hembra se cruzó (80.1 g).
+
+M4 y M5 tambien muesyta variación considerable entre sus hembras (SD = 53.3g y 70.7 g respectivamente).
+
+Esto sugiere que, aunque algunos machos, trasmiten un efecto genético bastante estable sin importar la hembra con la que se cruzen, mientras que otros, el resultado depende fuertemente de la combinación especifica, posiblemente esto se deba por el efecto de cada hembra o la variación individual entre las crías que el modelp no logra capturar del todo.
+
+```{r}
+# Consistencia = si el macho da crías con pesos parecidos, sin importar con cuál hembra se cruzó.
+# Media de peso por cada cruza macho x hembra
+# (cada hembra solo aparece con un macho, en este caso tres hembras se cruzan solamente con un macho especifico)
+medias_cruza <- D %>%
+  group_by(male, female) %>%
+  summarise(media_cruza = mean(weight), .groups = "drop")
+
+medias_cruza
+
+# para cada macho, ¿las 3 hembras le dieron crías con pesos parecidos, o  distintos?
+consistencia_macho <- medias_cruza %>%
+  group_by(male) %>%          # separa la tabla en 5 grupos, uno por macho
+  summarise(
+    media_general = mean(media_cruza),  # promedio de las 3 hembras (peso promedio de las crias de ese macho)
+# Dispersión de esas 3 medias: entre más grande, menos consistente es el macho
+    # (sus hembras le dieron pesos muy distintos entre sí)
+    sd_entre_hembras = sd(media_cruza),  
+    rango = max(media_cruza) - min(media_cruza),  # diferencia entre la mejor y la peor hembra del grupo
+    # Lo mismo que el sd, pero en porcentaje, para poder comparar machos
+    # que de por sí tienen pesos base distintos
+    cv_pct = round(sd_entre_hembras / media_general * 100, 1)  
+  ) %>%
+   # Ordena de más consistente (sd chico) a menos consistente (sd grande)
+  arrange(sd_entre_hembras)   
+consistencia_macho
+
+```
+
+
+
+```{r}
+# Graficas:
+
+# Gráfica 1: peso de cada cría, agrupado por hembra y separado por macho 
+# Si los puntos de un macho están muy juntos -> consistente
+# Si están muy dispersos -> el peso depende mucho de la hembra
+ggplot(D, aes(x = female, y = weight, color = male)) +
+  geom_jitter(width = 0.1, alpha = 0.6, size = 2) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = "black") +
+  facet_wrap(~ male, scales = "free_x", nrow = 1) +
+  labs(
+    title = "¿El peso de la progenie es parecido sin importar la hembra?",
+    subtitle = "Punto negro = promedio de esa cruza",
+    x = "Hembra", y = "Peso de la progenie (g)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Gráfica 2: comparar la consistencia (sd) entre los 5 machos
+# Barra chica = macho consistente (poca dispersión entre sus hembras)
+# Barra grande = macho inconsistente (mucha dispersión, depende de la hembra)
+ggplot(consistencia_macho, aes(x = reorder(male, sd_entre_hembras), y = sd_entre_hembras, fill = male)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = paste0(round(sd_entre_hembras, 1), " g")), vjust = -0.5, size = 3.5) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "¿Qué tan consistente es cada macho entre sus distintas hembras?",
+    subtitle = "Barra chica = efecto estable | barra grande = depende de la hembra",
+    x = "Macho", y = "SD entre medias de hembras (g)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+```
+
+# 5. Conclusiones
+
+- El peso de la progenie varía en promedio ~74 g dentro de una misma cruza, con diferencias notables entre familias (desde ~27 g hasta ~107 g de SD), lo que indica que la variabilidad individual no es homogénea en todas las familias
+
+- La mayor parte de la variación en el peso (68%) es de origen ambiental, mientras que solo el 32% corresponde a varianza genética.
+
+- M5 es el mejor reproductor (+21.2 g sobre la media) y M1 el de menor (-23.3 g). Entre las hembras, F14 y F01 destacan por su desempeño individual, mientras que F03 y F02 son las de menor aporte.
+
+- El modelo permite predecir con confianza el peso esperado de una cruza nueva a partir del efecto del macho, pero no puede anticipar el efecto de una hembra fuera de su cruza original, debido al diseño anidado del experimento (hembra dentro de macho).
+
+- El efecto de un macho no siempre es consistente: mientras M3 transmite un efecto genético estable sin importar la hembra (SD = 8.9 g), M1 depende fuertemente de la combinación específica (SD = 80.1 g), lo que sugiere que el mérito genético del macho no siempre "domina" el resultado final.
+
+- En conjunto, estos resultados muestran que la selección de reproductores basada únicamente en el efecto promedio del macho (BLUP) puede ser insuficiente: machos con buen mérito genético pero poca consistencia (como M1) representan mayor riesgo/incertidumbre en la progenie que machos con mérito moderado pero alta consistencia (como M3).
+
+
